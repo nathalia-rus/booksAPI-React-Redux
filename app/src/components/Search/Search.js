@@ -1,8 +1,14 @@
 // npm install immutable
  import { fromJS } from "immutable"
  import fetch from "isomorphic-fetch"
+ import {isEmpty} from 'lodash'
+
  // when u got one: import apiKey from "auth/apiKey"
  // https://books.google.com/books?uid=117217888285977420980&hl=fr
+ // my bookshelf (cf Postman GET):
+ // https://www.googleapis.com/books/v1/users/117217888285977420980/bookshelves/1001/?key=AIzaSyAPlIAbAw6BHJgtOtUJJdQmbsN4ADFlgq8
+ // the url to get here:
+ // https://www.googleapis.com/books/v1/volumes?q=<QUERY>&key=AIzaSyAPlIAbAw6BHJgtOtUJJdQmbsN4ADFlgq8
 
  // AIzaSyAPlIAbAw6BHJgtOtUJJdQmbsN4ADFlgq8
  // my id = 117217888285977420980
@@ -43,12 +49,15 @@ export function setQuery (query) {
 // now:
 
 export const getBooks = (query) => {
+  // check if empty though. 
+  // then, you'd set an empty array on the state 
+  // using lodash here
   return (dispatch, getState) => {
     dispatch(setQuery(query))
     // okay, now our fetch call, go get url :
     // GET https://www.googleapis.com/books/v1/volumes?q={search terms}
     // later: get an API key of your own, or the server might lock you out. 
-      fetch("https://www.googleapis.com/books/v1/volumes?q=" + query + '&key=' + apiKey) // if API key: + apiKey 
+      !isEmpty(query)? fetch("https://www.googleapis.com/books/v1/volumes?q=" + query + '&key=' + apiKey) // if API key: + apiKey 
       .then(response => {
         // we need to check the status 
         if (response.status >= 400) {
@@ -62,20 +71,24 @@ export const getBooks = (query) => {
       dispatch(setBooks(books.items))
       // this is actually gonna contain the actual data from the server 
       // gonna be an object,and it's gonna have the items = array of objects which have our books
+      // items: cf Postman, items array 
       }).catch(error => {
         console.log(error)
       })
-      // catches the error 
-
+            // catches the error 
+       : dispatch(setBooks([]))
   }
 }
-
-
 
 // gonna expose this getbooks fn to the entire app, and attach this fn into the intpu box
 // and bind it on change event, so everytile u type, sending info from the input box into this fn 
 // gonna make a fetch and do all this stuff
 // dispatch: dispatches actions in this file, in this case, the setbooks fn in here 
+
+export const action = {
+    getBooks
+}
+
 
 // ACTIONS HANDLERS
 
