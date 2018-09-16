@@ -29,11 +29,25 @@ export function setQuery (query) {
 
 // other action later on: GET_BOOKS, to handle our fetching. 
 
-//
 // Actions handlers 
-// 
+
+const ACTION_HANDLERS =  {
+  [SET_BOOKS]: (state, {payload: books}) => {
+    return state.set('books', fromJS(books))
+    // prop in the state called books, gonna be an array of objects. 
+    // set = function from immutable js 
+    // need to convert that array of object into a map ( reg js object), or list (array)
+  },
+    [SET_QUERY]: (state, {payload: query}) => {
+      return state.set('query', fromJS(query))
+    }
+}
 
 //
 // Reducer
-// 
 
+const initialState = fromJS({});
+export default(state = initialState, action) => {
+  const handler = ACTION_HANDLERS[action.type]
+  return handler ? handler(state, action) : state
+}
